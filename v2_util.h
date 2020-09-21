@@ -1,7 +1,28 @@
+/*
+ *  Copyright (c) 1997-2020 Oleg Vlasenko <vop@unity.net>
+ *  All Rights Reserved.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+/* A basic set of various procedures and data types. */
+
 #ifndef _V2_UTIL_H
 #define _V2_UTIL_H 1
 
-// Updated at 19 Feb 2019
+// Updated at 21 Sep 2020
 
 #include <stdio.h>
 #include <string.h>
@@ -22,7 +43,7 @@
 
 #define FOR_LST(m,n) for((m)=(n); (m); (m)=(m)->next)
 #define FOR_LST_IF(m,k,n) for((m)=(n); (m) && !(k); (m)=(m)->next)
-#define FOR_LST_RC(m,n) for((m)=(n); (m) && !rc; (m)=(m)->next)
+// #define FOR_LST_RC(m,n) for((m)=(n); (m) && !rc; (m)=(m)->next)
 #define FOR_LST_NEXT(m,n) for((m)=(n); (m) && (m)->next; (m)=(m)->next)
 
 #define XFREAD_NOT_RUN    -743
@@ -58,7 +79,6 @@
 
 #define VL_LEN MAX_STRING_LEN
 
-// s - dst_str, l - length(0=default only for static string!!!), f - format,
 #define VL_STR(s,l,f) {\
     *(s)=(char)0; \
     if((f) && *(f)) { \
@@ -120,12 +140,6 @@ typedef struct _str_lst_t {
     };
 } str_lst_t;
 
-//typedef struct {
-//    int c;    // argc
-//    char **v; // argv
-//    char *b; // Values buffer
-//} v2_arg_t;
-
 extern str_lst_t *v2_err_lst;
 extern int (*v2_hook_error)(str_lst_t *err_rec); // Hook for error and debug
 
@@ -146,7 +160,7 @@ void v2_free(void **p_mem); // Free memory blick if exists
 
 // ------------------------------------------------------------------------------------------------------------------
 int v2_getword(char *word, char *line, char stop);
-int getnetxarg(char *word, char *line);
+int v2_getnetxarg(char *word, char *line);
 char *makeword(char *line, char stop);
 char *fmakeword(FILE *f, char stop, int *cl);
 char x2c(char *what);
@@ -157,16 +171,8 @@ void plustospace(char *str);
 int v2_getline(char *s, int n, FILE *f);
 void v2_putline(FILE *f,char *l);
 void send_fd(FILE *f, FILE *fd);
-int ind(char *s, char c);
-void escape_shell_cmd(char *cmd);
 
 // ------------------------------------------------------------------------------------------------------------------
-/* xutil */
-void xabort(void);
-char *xmalloc(size_t);
-char *xstrcpy(char *);
-//char *xstrcat(char *,char *);
-
 FILE *xfopen_read(char *file, ...);
 FILE *xfopen_write(char *file, ...);
 // int xfread_cfg(str_lst_t **pt_lst, char *file, ...); // Read config file - moved to v2_lstr.fcfg()
@@ -180,7 +186,6 @@ int sfread_print(char *in_str, void *in_data); // user as rd_str function for sf
 int sfreadf(int (*rd_str)(char*, void*), void *pass_data, char *file, ...); // New generation
 int sfread(int (*rd_str)(char*, void*), void *pass_data, char *file);     // New generation
 
-int sfread_old(int (*rd_str)(char*, void*), void *pass_data, char *file, ...);
 int sfsave(int (*wr_fun)(FILE*, void*), void *pass_data, char *file);
 int sfsavef(int (*wr_fun)(FILE*, void*), void *pass_data, char *in_file, ...);
 
@@ -196,7 +201,7 @@ int v2_readdir(str_lst_t **p_list, int (*filter)(char*,void*), void *in_data, ch
 char *v2_xrc(int code); // Prints error code
 // ------------------------------------------------------------------------------------------------------------------
 // Strings
-int v2_strshift(int pos, char *word); // Shift string at positions
+int v2_strshift(int pos, char *in_word); // Shift string at positions
 char *v2_tok(int num, char *in_str, char dlm); // Token number num, separated by char dlm
 char *v2_toks(int num, char *in_str, char *in_dlm); // Token number num, separated byt any char from in_dlm
 char *v2_toke(char *in_tok, char *in_dlm); // Return pointer just after token

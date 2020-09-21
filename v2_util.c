@@ -1,3 +1,29 @@
+/*
+ *  Copyright (c) 1997-2020 Oleg Vlasenko <vop@unity.net>
+ *  All Rights Reserved.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
+/*
+ * Important note! This file contains code snippets by another authors.
+ * Unfortunately, I have no information about them.
+ * I believe these snippets are licensed for free use.
+ * If not so, let me know.
+ */
+
 #define _GNU_SOURCE
 #include "v2_util.h"
 #include <errno.h>
@@ -11,7 +37,7 @@
 // ERROR_CODE 114XX
 // ERROR_CODE 115XX
 
-// Set of different useful functions
+/* A basic set of various procedures and data types. */
 
 #define LF 10
 #define CR 13
@@ -37,11 +63,13 @@ int v_mon_days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 
 /* ============================================== */
+// Abort programm with error message
 void v2_abort(char *in_msg) {
     fprintf(stderr, "%s\n", v2_st(in_msg, "Memory allocation error."));
     _exit(119);
 }
 /* ============================================== */
+// Freed void pointer with checking and setting it to null
 void v2_free(void **p_mem) {
     if(!p_mem || !*p_mem) return;
     free(*p_mem);
@@ -49,6 +77,7 @@ void v2_free(void **p_mem) {
     return;
 }
 /* ============================================== */
+// Freed string with checking and reseting
 void v2_freestr(char **p_str) {
     if(!p_str || !*p_str) return;
     free(*p_str);
@@ -56,6 +85,7 @@ void v2_freestr(char **p_str) {
     return;
 }
 /* ============================================== */
+// Replace old allocated variable by alreasy allocated one
 char *v2_letstr(char **p_str, char *in_str) { // Not allocated
 
     if(!p_str) return(in_str);
@@ -63,29 +93,31 @@ char *v2_letstr(char **p_str, char *in_str) { // Not allocated
     return((*p_str=in_str));
 }
 /* ============================================== */
-int v2_strshift(int pos, char *word) {
+// Shift string to start on number positions
+int v2_strshift(int pos, char *in_word) {
     int len=0;
     int x=0;
 
-    if(word==NULL) return(0);
+    if(in_word==NULL) return(0);
 
-    len=strlen(word);
+    len=strlen(in_word);
 
     if(pos<0) return(len);
 
     if(pos >= len) {
-	word[0] = '\0';
+	in_word[0] = '\0';
 	return(0);
     }
 
     len-=pos;
 
-    while((word[x++] = word[pos++]));
+    while((in_word[x++] = in_word[pos++]));
 
     return(len); // Return letf chars
 }
 
 /* ============================================== */
+// Return pointer to numbered token separated by dilemiter
 char *v2_tok(int num, char *in_str, char dlm) {
     char *pnt=NULL;
     if(!dlm) dlm=' ';
@@ -125,7 +157,7 @@ char *v2_toke(char *in_tok, char *in_dlm) {
     return(*pnt?pnt:NULL);
 }
 /* ============================================== */
-// Returns signle toked from string. If in_num == 0 , return xerro string
+// Returns signle token from string. Not detects too long tokens
 char *v2_tok_r(char *sbuf, int slen, int tok_num, char *in_str, char *in_dlm) {
     char *p, *e;
     int len=0;
@@ -136,7 +168,7 @@ char *v2_tok_r(char *sbuf, int slen, int tok_num, char *in_str, char *in_dlm) {
 
     if(!slen || !tok_num || !in_str || !in_str[0]) return(sbuf);
 
-    if(!(p=v2_toks(tok_num, in_str, in_dlm)))    return(sbuf);
+    if(!(p=v2_toks(tok_num, in_str, in_dlm)))      return(sbuf);
 
     if((e=v2_toke(p, in_dlm))) {
 	len=e-p; // strlen + 1 symbol
@@ -151,6 +183,7 @@ char *v2_tok_r(char *sbuf, int slen, int tok_num, char *in_str, char *in_dlm) {
     return(sbuf);
 }
 /* ============================================== */
+// Get next word from line. Looks like rework from Apache.
 int v2_getword(char *word, char *line, char stop) {
     int x = 0,y,l;
 
@@ -170,7 +203,8 @@ int v2_getword(char *word, char *line, char stop) {
 }
 
 /* ============================================== */
-int getnetxarg(char *word, char *line) {
+// Like getword, but with string markers
+int v2_getnetxarg(char *word, char *line) {
     int x, y, l;
     char stop=' ';
 
@@ -186,6 +220,7 @@ int getnetxarg(char *word, char *line) {
 }
 
 /* ============================================== */
+// Allocate word from line. Guess from Apache.
 char *makeword(char *line, char stop) {
     int x = 0,y;
     char *word = (char *) malloc(sizeof(char) * (strlen(line) + 1));
@@ -202,6 +237,7 @@ char *makeword(char *line, char stop) {
 }
 
 /* ============================================== */
+// Make word from input stream. Guess from Apache.
 char *fmakeword(FILE *f, char stop, int *cl) {
     int wsize;
     char *word;
@@ -230,6 +266,7 @@ char *fmakeword(FILE *f, char stop, int *cl) {
 }
 
 /* ============================================== */
+// hex to char
 char x2c(char *inps) {
     register char outc;
 
@@ -238,21 +275,8 @@ char x2c(char *inps) {
     outc += (inps[1] >= 'A' ? ((inps[1] & 0xdf) - 'A')+10 : (inps[1] - '0'));
     return(outc);
 }
-
-
-//if (out == NULL)    return 0;
-//if (hex >= '0' && hex <= '9') {
-//    *out = hex - '0';
-//} else if (hex >= 'A' && hex <= 'F') {
-//    *out = hex - 'A' + 10;
-//} else if (hex >= 'a' && hex <= 'f') {
-//    *out = hex - 'a' + 10;
-//} else {
-//    return 0;
-//}
-//return 1;
-
 /* ============================================== */
+// Unescape URL symbols
 void unescape_url(char *url) {
     register int x,y;
 
@@ -268,6 +292,7 @@ void unescape_url(char *url) {
 }
 
 /* ============================================== */
+// Unescape URL space
 void plustospace(char *str) {
     register int x;
 
@@ -276,11 +301,13 @@ void plustospace(char *str) {
 }
 
 /* ============================================== */
+// Code to hex
 char to_hex(char code) {
   static char hex[] = "0123456789ABCDEF";
-  return hex[code & 15];
+  return hex[code & 0x0f];
 }
 /* ============================================== */
+// Escape URL symbols. Guess from Apache.
 char *escape_url(char *in_str) {
     static char strtmp[MAX_STRING_LEN];
     int x=0;
@@ -299,6 +326,7 @@ char *escape_url(char *in_str) {
     return(strtmp);
 }
 /* ============================================== */
+// Escape quotas symbols and spaces
 char *escape_url_quota(char *in_str) {
     char strtmp[strlen(in_str)*2];
     int res=0;
@@ -320,6 +348,7 @@ char *escape_url_quota(char *in_str) {
 }
 
 /* ============================================== */
+// Get line from the line. Rework.
 int v2_getline(char *s, int n, FILE *f) {
     register int i=0;
     char rt='\0';
@@ -345,6 +374,7 @@ int v2_getline(char *s, int n, FILE *f) {
 }
 
 /* ============================================== */
+// Put line to file. Opposite to printf, this one puts w/o formating
 void v2_putline(FILE *f,char *l) {
     int x;
 
@@ -353,6 +383,7 @@ void v2_putline(FILE *f,char *l) {
 }
 
 /* ============================================== */
+// Copy chars from stream to stream.
 void send_fd(FILE *f, FILE *fd) {
 /*    int num_chars=0; */
     char c;
@@ -365,33 +396,8 @@ void send_fd(FILE *f, FILE *fd) {
      return;
 }
 
-/* ============================================== */
-int ind(char *s, char c) {
-    register int x;
-
-    for(x=0;s[x];x++)
-        if(s[x] == c) return x;
-
-    return -1;
-}
-
-/* ============================================== */
-void escape_shell_cmd(char *cmd) {
-    register int x,y,l;
-
-    l=strlen(cmd);
-    for(x=0;cmd[x];x++) {
-        if(ind("&;`'\"|*?~<>^()[]{}$\\\x0A",cmd[x]) != -1){
-            for(y=l+1;y>x;y--)
-                cmd[y] = cmd[y-1];
-            l++; /* length has been increased */
-            cmd[x] = '\\';
-            x++; /* skip the character */
-        }
-    }
-}
-
 /* ================================================================= */
+// Purge taggs from the string.
 char *v2_untag(char *in_buf, int in_size, char *in_str) {
     int x=0;
     int y=0;
@@ -421,6 +427,7 @@ char *v2_untag(char *in_buf, int in_size, char *in_str) {
     return(in_buf);
 }
 /* ================================================================= */
+// The same as above, but inside of the string
 char *v2_filter_tags(char *in_str) {
     char strtmp[MAX_STRING_LEN];
     int x=0;
@@ -449,6 +456,7 @@ char *v2_filter_tags(char *in_str) {
     return(v2_strcpy(strtmp));
 }
 /* ========================== xutil ========================= */
+// Formatted open for read
 FILE *xfopen_read(char *file, ...) {
     va_list vl;
     char strtmp[MAX_STRING_LEN];
@@ -464,6 +472,7 @@ FILE *xfopen_read(char *file, ...) {
 }
 
 /* ============================================== */
+// Formatted open for write
 FILE *xfopen_write(char *file, ...) {
     va_list vl;
     char strtmp[MAX_STRING_LEN];
@@ -482,6 +491,7 @@ FILE *xfopen_write(char *file, ...) {
 /* ============================================== */
 // If file = ":/usr/bin...." - run file as cmd
 // If file = "#/path/file..." or "#:/usr/bin..." - exclude all comments
+// Better to use v2_lstr.read() from v2_lstr lib,
 int xfread(str_lst_t **pt_lst, char *file, ...) {
     struct stat st;
     FILE *cf=NULL;
@@ -535,6 +545,7 @@ int xfread(str_lst_t **pt_lst, char *file, ...) {
     return(0);
 }
 /* ============================================== */
+// Part of new xfread()
 int xfread_fun(char *in_str, void *in_data) {
     str_lst_t **p_lstr=(str_lst_t **)in_data;
 
@@ -545,6 +556,7 @@ int xfread_fun(char *in_str, void *in_data) {
     return(0);
 }
 /* ============================================== */
+// New one with sfread() routine
 int xfread_new(str_lst_t **pt_lst, char *file, ...) {
     char strtmp[MAX_STRING_LEN];
     int rc=0;
@@ -618,6 +630,7 @@ int sfread_print(char *in_str, void *in_data) {
     return(0);
 }
 /* ============================================== */
+// Universal dile reading function
 int sfread(int (*rd_str)(char*, void*), void *pass_data, char *file) {
     FILE *cf=NULL;
     //struct stat st;
@@ -666,6 +679,7 @@ int sfread(int (*rd_str)(char*, void*), void *pass_data, char *file) {
     return(rc);
 }
 /* ============================================== */
+// Formated variant of sfread()
 int sfreadf(int (*rd_str)(char*, void*), void *pass_data, char *file, ...) {
     char *tfile=NULL;
     va_list vl;
@@ -684,70 +698,7 @@ int sfreadf(int (*rd_str)(char*, void*), void *pass_data, char *file, ...) {
     return(rc);
 }
 /* ============================================== */
-//
-// Need to rebuild
-// [;|#][:|!]file_name
-// ; and # - comments
-// TODO
-// File: [;][#][:]file_name
-// ; - not error if file not found
-// # - skip comment strings
-// : - not open file, but run script
-// File: [#]-
-// Read stdin
-// rd_str - each readed string added here,
-int sfread_old(int (*rd_str)(char*, void*), void *pass_data, char *file, ...) {
-    FILE *cf=NULL;
-    char strtmp[MAX_STRING_LEN];
-    int in_type=0; // 1 == stdin, 2 = exec
-    int r_pos=0; // Remark position
-    int no_comm=0; // No comments
-    int no_found=0; // No found is not error
-    int rc=0;
-    int rc1=0;
-
-    errno=0;
-
-    if(!rd_str)           return(XFREAD_NOT_FUNC);
-    if(!file || !file[0]) return(XFREAD_NOT_NAME); // Errno returned
-
-    VL_STR(strtmp, 0, file);
-
-    if(strtmp[r_pos] == ';') { r_pos++; no_found=1; } // Deprecated one
-    if(strtmp[r_pos] == '#') { r_pos++; no_comm=1;  }
-    if(strtmp[r_pos] == '!') { r_pos++; no_found=1; } // Current variant
-
-    if(!strcmp(strtmp+r_pos, "-")) {
-	cf=stdin;
-	in_type=1;
-    } else if(strtmp[r_pos]==':') {
-	if(!(cf=popen(strtmp+1+r_pos, "r"))) return(XFREAD_NOT_RUN);
-	in_type=2;
-    } else {
-	if(!(cf=fopen(strtmp+r_pos, "r"))) {
-	    if(errno != ENOENT)	return(XFREAD_NOT_ACCESS);
-	    if(no_found) return(0); // Not found is not error!
-	    return(XFREAD_NOT_FOUND);// return(v2_ret_error(XFREAD_NOT_FOUND, "%s", strtmp));
-	}
-    }
-
-    while(!v2_getline(strtmp, MAX_STRING_LEN, cf) && !rc) {
-	if(no_comm) {
-	    if(strtmp[0] == '\0') continue;
-	    if((strtmp[0] == '#') || (strtmp[0] == ';')) continue;
-	}
-	rc=rd_str(strtmp, pass_data);
-    }
-
-    if(in_type == 0) {
-	if(fclose(cf)) return(XFREAD_NOT_CLOSE);
-    }
-    if(in_type == 2) {
-	if((rc1=pclose(cf))) return(rc1);
-    }
-    return(rc);
-}
-/* ============================================== */
+// Universal file write function
 int sfsave(int (*wr_fun)(FILE*, void*), void *pass_data, char *file) {
     FILE *cf=NULL;
     char *t_name=NULL;
@@ -783,6 +734,7 @@ int sfsave(int (*wr_fun)(FILE*, void*), void *pass_data, char *file) {
 
 }
 /* ============================================== */
+// Formatted variant of previouse one
 int sfsavef(int (*wr_fun)(FILE*, void*), void *pass_data, char *in_file, ...) {
     va_list vl;
     char *nfile=NULL;
@@ -802,6 +754,7 @@ int sfsavef(int (*wr_fun)(FILE*, void*), void *pass_data, char *in_file, ...) {
     return(rc);
 }
 /* ============================================== */
+// Returns most common errors of read/save functions. Use also errno as additional one
 char *v2_xrc(int code) {
     static char strerr[30];
 
@@ -824,58 +777,6 @@ char *v2_xrc(int code) {
 
     return(v2_s(strerr, 30, "xrc=%d", code));
 }
-/* ============================================== */
-void xabort(void)
-{
-    printf("No memory for xutil.\n");
-    _exit(117);
-}
-
-/* ============================================== */
-char *xmalloc(size)
-size_t size;
-{
-	char *tmp;
-	tmp=malloc(size);
-	if (!tmp) xabort();
-	
-	return tmp;
-}
-
-/* ============================================== */
-char *xstrcpy(src)
-char *src;
-{
-	char	*tmp;
-
-	if ((src == NULL) || (*src=='\0')) return(NULL);
-	tmp=xmalloc(strlen(src)+1);
-	strcpy(tmp,src);
-	return tmp;
-}
-
-/* ============================================== */
-/*
-char *xstrcat(src,add)
-char *src,*add;
-{
-	char *tmp;
-	size_t size=0;
-
-	if ((add == NULL) || (strlen(add) == 0)) return src;
-	if (src) size=strlen(src);
-	size+=strlen(add);
-	tmp=xmalloc(size+1);
-	*tmp='\0';
-	if (src) 
-	{
-		strcpy(tmp,src);
-		free(src);
-	}
-	strcat(tmp,add);
-	return tmp;
-}
-*/
 /* ============================================================== */
 // Print file
 int v2_cat(char *in_file, ...) {
@@ -932,7 +833,12 @@ int v2_dir(mode_t mode, char *in_dir, ...) {
 	if(chmod(tmp, mode))               return(3); // Mode ready
     } else { // Not found
 	//errno=0; // Reset "Directory not found" - not actually needed
-	if(mkdir(tmp, mode?mode:0755))               return(4);
+//#ifdef WIN32
+//	if(mkdir(tmp))                     return(4); // POSIX way
+//	if(chmod(tmp, mode?mode:0755))     return(3); // Mode ready
+//#else
+	if(mkdir(tmp, mode?mode:0755))     return(4);
+//#endif
     }
 
     return(0);
