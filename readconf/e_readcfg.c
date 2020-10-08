@@ -3,8 +3,8 @@
 /* Example config file reading */
 
 /*
- * Read configuration from the file "e.cfg" to nest structure
-
+ * Read configuration from the file "e.cfg" to next structure
+ *
  */
 
 #include "v2_util.h"
