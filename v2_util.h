@@ -37,8 +37,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#define V2_MAX_LEN 2048
+
 #ifndef MAX_STRING_LEN
-#define MAX_STRING_LEN 2048
+#define MAX_STRING_LEN V2_MAX_LEN
 #endif
 
 #define FOR_LST(m,n) for((m)=(n); (m); (m)=(m)->next)
@@ -154,7 +156,7 @@ extern char *v2_str_zero;
 extern int v2_debug; // Debug level for add debug
 extern int v2_debug_time; // Print time before debug message
 
-
+#define v2_kaput(n) v2_abort(n)
 void v2_abort(char *in_msg); // Stop programm execution
 void v2_free(void **p_mem); // Free memory blick if exists
 
@@ -227,9 +229,7 @@ char *v2_stf(char *in_str, char *in_rpl, ...);  // Show string or replacement
 //char *v2_as(char *in_str);                // Shows in_str or "-=unset=-" value == v2_st(in_str, "-=unset=-")
 //char *v2_nn(char *in_str);                // Returns in.str, or "", but not NULL
 
-// #define v2_1_allshow(n) v2_st((n), "-=uset=-")
 #define v2_as(n)      v2_st((n), "-=unset=-")
-// #define v2_1_nonull(n)  v2_st((n), "")
 #define v2_nn(n)      v2_st((n), "")
 
 //extern char *(*v2_add_var)(char**, char*, ...);
@@ -310,6 +310,7 @@ str_lst_t *v2_lstr_separate(str_lst_t *i_str);                                  
 int v2_lstr_separate_by(str_lst_t *i_str, char by_ch);                          // Separate by key
 int v2_lstr_separate_lst_by(str_lst_t *i_str, char by_ch);                      // Separate all list
 
+#define v2_lstr_spr_by(n, m) v2_lstr_separate_by((n), (m))
 #define v2_lstr_spr(n) v2_lstr_separate(n)
 
 int v2_lstr_rback(str_lst_t **p_str);

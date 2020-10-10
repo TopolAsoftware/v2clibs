@@ -1186,14 +1186,17 @@ char *v2_cf(char *cf_str, char* var_name) {
     if(!cf_str || !*cf_str || !var_name)   return(NULL);
 
     if(!(nam_len=strlen(var_name)))        return(NULL);
-    if(!(tmp=strchr(cf_str, ' '))) {
-	if(!strcmp(cf_str, var_name))       return(""); // Cfg str w/o argument
+    //if(!(tmp=strchr(cf_str, ' '))) {
+    if(!(tmp=strpbrk(cf_str, " \t"))) {
+	if(!strcmp(cf_str, var_name))      return(""); // Cfg str w/o argument
 	return(NULL);
     }
     if(nam_len != (tmp-cf_str))            return(NULL);
     if(strncmp(cf_str, var_name, nam_len)) return(NULL);
 
-    while((*tmp==' ') || (*tmp=='\t')) tmp++;
+    tmp+=strspn(tmp, " \t");
+
+    //while((*tmp==' ') || (*tmp=='\t')) tmp++;
 
     return(tmp);
 }
@@ -1221,19 +1224,18 @@ int v2_cf_int(int *ivar, char *cf_str, char *var_name) {
     if(!ivar)                           return(0);
 
     if(!(tmp=v2_cf(cf_str, var_name)) || !*tmp) return(0); // Not var found
-    *ivar=atol(tmp);
+    *ivar=atoi(tmp);
 
     return(1); // OK
 }
 /* ==================================================================== */
 // Have to be rebuild for  range
 int v2_cf_prc(int *ivar, char *cf_str, char *var_name) {
-    int var=0;
 
-    if(!v2_cf_int(&var, cf_str, var_name)) return(0); // Not our variable
+    if(!v2_cf_int(ivar, cf_str, var_name)) return(0); // Not our variable
 
-    if(var < 0 )   var = 0;
-    if(var > 100 ) var = 100;
+    if(*ivar < 0 )   *ivar = 0;
+    if(*ivar > 100 ) *ivar = 100;
 
     return(1); // OK
 }
@@ -1513,8 +1515,8 @@ int v2_str_trim(char *in_str, char *in_trm) {
     int s_len=0;
     int x, y;
 
-    if(!in_str || !in_str[0]) return(0);
-    if(!in_trm || !in_trm[0]) return(0);
+    if(!in_str || !*in_str) return(0);
+    if(!in_trm || !*in_trm) return(0);
 
     s_len=strlen(in_str);
     y=strspn(in_str, in_trm);
@@ -2245,7 +2247,7 @@ int v2_css_print(str_lst_t *in_css) {
 //              argv functions
 /* ========================================================= */
 /* ========================================================= */
-// Just returns pointer to mono-nassive with vector and data
+// Just returns pointer to mono-massive with vector and data
 // It is enough just free() it
 //
 // ------------ outv
