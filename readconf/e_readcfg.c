@@ -39,12 +39,14 @@ int e_read_str(char *in_str, void *no_data) {
 int main() {
     int rc=0;
 
-    /* Just read dile and call e_read_str() for each string */
+    /* Just read file and call e_read_str() for each string */
     /* Symbol '#' at start file name means skip comments and empty strings */
     if((rc=sfread(&e_read_str, NULL, "#" MY_CONFIG_FILE))) {
 	printf("ERROR! Fuction returns[rc=%d]: %s (%s)\n", rc, v2_xrc(rc), strerror(errno));
 	return(0);
     }
+
+    /* Print all out variables */
 
     printf("Red config file \""MY_CONFIG_FILE"\" next values:\n");
 
