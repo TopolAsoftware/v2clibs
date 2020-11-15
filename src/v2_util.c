@@ -20,7 +20,7 @@
 /*
  * Important note! This file contains code snippets by another authors.
  * Unfortunately, I have no information about them.
- * I believe these snippets are licensed for free use.
+ * I believe these snippets are licensed for free use or public domain.
  * If not so, let me know.
  */
 
@@ -631,34 +631,32 @@ int sfread_print(char *in_str, void *in_data) {
 }
 /* ============================================== */
 // Universal dile reading function
+// [#][!][:|-](file_name)
 int sfread(int (*rd_str)(char*, void*), void *pass_data, char *file) {
     FILE *cf=NULL;
-    //struct stat st;
     char strtmp[MAX_STRING_LEN];
-    int r_pos=0; // Remark position
     int no_comm=0; // No comments
     int no_found=0; // No found is not error
     int is_fp=0; // Is file == or pipe == 2
-    int rc1=0;
     int rc=0;
 
     if(!rd_str)           return(XFREAD_NOT_FUNC);
-    if(!file || !file[0]) return(XFREAD_NOT_NAME); // Errno returned
+    if(!file || !*file) return(XFREAD_NOT_NAME); // Errno returned
 
-    //if(strtmp[r_pos] == ';') { r_pos++; no_comm=2;  } //
-    if(file[r_pos] == '#') { r_pos++; no_comm=1;  }
-    if(file[r_pos] == '!') { r_pos++; no_found=1; } // Current variant
+    //if(*file == ';') { ++file; no_comm=2;  } //
+    if(*file == '#') { ++file; no_comm=1;  }
+    if(*file == '!') { ++file; no_found=1; } // Current variant
 
-    if(!strcmp(file+r_pos, "-")) {
+    if(!strcmp(file, "-")) {
 	cf=stdin;
-    } else if(file[r_pos]==':') {
-	if(!(cf=popen(file+1+r_pos, "r"))) return(XFREAD_NOT_RUN);
+    } else if(*file==':') {
+	if(!(cf=popen(++file, "r"))) return(XFREAD_NOT_RUN);
 	is_fp=2;
     } else {
-	if(!(cf=fopen(file+r_pos, "r"))) {
+	if(!(cf=fopen(file, "r"))) {
 	    if(errno != ENOENT)	return(XFREAD_NOT_ACCESS);
 	    if(no_found) return(0); // Not found is not error!
-	    return(XFREAD_NOT_FOUND);// return(v2_ret_error(XFREAD_NOT_FOUND, "%s", strtmp));
+	    return(XFREAD_NOT_FOUND);
 	}
 	is_fp=1;
     }
@@ -674,6 +672,7 @@ int sfread(int (*rd_str)(char*, void*), void *pass_data, char *file) {
     if(is_fp == 1) { // File
 	if(fclose(cf)) return(XFREAD_NOT_CLOSE);
     } else if(is_fp == 2) { // Pipe
+	int rc1=0;
 	if((rc1=pclose(cf))) return(rc1);
     }
     return(rc);
@@ -844,7 +843,7 @@ int v2_dir(mode_t mode, char *in_dir, ...) {
     return(0);
 }
 /* ============================================================== */
-// Read dir into list or just call function
+// Read dir into list or just call function filter()
 int v2_readdir(str_lst_t **p_list, int (*filter)(char*,void*), void *in_data, char *in_dir, ...) {
     DIR *tdir=NULL;
     struct dirent *tent=NULL;
@@ -1810,9 +1809,6 @@ int v2_lstr_free(str_lst_t **p_str) {
     str_lst_t *str_tmp=NULL;
 
     if(!p_str) return(1);
-
-    //while((*p_str)) {
-    //    str_tmp=(*p_str);
 
     while((str_tmp=(*p_str))) {
         (*p_str)=(*p_str)->next;
